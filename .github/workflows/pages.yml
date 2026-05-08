@@ -38,23 +38,22 @@ jobs:
           git lfs install
           git lfs pull
 
-      - name: Check that docs does not contain LFS pointer files
+      - name: Debug docs before pipeline
         run: |
-          echo "Checking docs folder for Git LFS pointer files..."
+          echo "Current commit before pipeline:"
+          git rev-parse HEAD
 
-          if grep -R "version https://git-lfs.github.com/spec/v1" -n docs; then
-            echo "ERROR: Git LFS pointer files found inside docs/"
-            echo "GitHub Pages cannot deploy LFS pointer files as a website."
-            echo "Fix locally with:"
-            echo "  git lfs untrack 'docs/**'"
-            echo "  git rm --cached -r docs"
-            echo "  git add .gitattributes docs"
-            echo "  git commit -m 'Fix docs files not using LFS'"
-            echo "  git push origin main"
-            exit 1
-          else
-            echo "OK: No LFS pointer files found in docs/"
-          fi
+          echo "Current branch:"
+          git branch --show-current
+
+          echo "Remote:"
+          git remote -v
+
+          echo "First 30 lines of docs/index.html before pipeline:"
+          head -30 docs/index.html || true
+
+          echo "Checking for LFS pointers before pipeline:"
+          grep -R "version https://git-lfs.github.com/spec/v1" -n docs || true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -85,22 +84,26 @@ jobs:
         run: |
           python run_pipeline.py
 
-      - name: Check generated docs again
+      - name: Validate docs after pipeline
         run: |
-          echo "Checking generated docs folder..."
+          echo "Checking docs after pipeline..."
 
           if [ ! -f docs/index.html ]; then
-            echo "ERROR: docs/index.html does not exist."
-            echo "Your GitHub Pages site needs docs/index.html."
+            echo "ERROR: docs/index.html does not exist"
             exit 1
           fi
 
+          echo "First 40 lines of docs/index.html after pipeline:"
+          head -40 docs/index.html
+
+          echo "Searching for LFS pointers inside docs:"
           if grep -R "version https://git-lfs.github.com/spec/v1" -n docs; then
-            echo "ERROR: Pipeline generated or kept LFS pointer files inside docs/"
+            echo "ERROR: Git LFS pointer found inside docs/"
+            echo "GitHub Pages would deploy broken pointer files."
             exit 1
+          else
+            echo "OK: No LFS pointer files found inside docs/"
           fi
-
-          echo "OK: docs/index.html exists and docs has no LFS pointer files."
 
       - name: Commit updated dashboard files
         run: |
@@ -116,6 +119,20 @@ jobs:
             git push origin HEAD:${{ github.ref_name }}
           fi
 
+      - name: Debug final deployed files
+        run: |
+          echo "Current commit:"
+          git rev-parse HEAD
+
+          echo "First 40 lines of docs/index.html:"
+          head -40 docs/index.html
+
+          echo "All LFS pointers inside docs:"
+          grep -R "version https://git-lfs.github.com/spec/v1" -n docs || true
+
+          echo "Docs file sizes:"
+          find docs -maxdepth 2 -type f -exec ls -lh {} \;
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
@@ -126,4 +143,4 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

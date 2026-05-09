@@ -42,3 +42,15 @@ models/**/*.cbm
 venv/
 .env
 local/
+
+# Large/generated data - keep local, do not commit
+data/
+outputs/
+reports/metrics/
+dashboard/data/
+docs/data/
+
+# Generated file types
+*.parquet
+*.csv
+*.json

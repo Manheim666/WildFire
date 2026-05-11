@@ -274,7 +274,7 @@ function renderStrip() {
       return `<div class="fc-card${active}" data-date="${row.date}">
         <div class="fc-date">${dt.toLocaleDateString("en",{weekday:"short"})}<br>${dt.toLocaleDateString("en",{month:"short",day:"numeric"})}</div>
         <div class="fc-risk-dot" style="background:${col}">${Math.round(row.probability*100)}</div>
-        <div class="fc-temp">${f1(row.temp_max ?? row.temperature)}°/${f1(row.temp_min ?? row.temperature)}°</div>
+        <div class="fc-temp">${f1(row.temp_min ?? row.temperature)}°/${f1(row.temp_max ?? row.temperature)}°</div>
         <div class="fc-wind">${f1(row.wind)} km/h</div>
         <div class="fc-label" style="background:${col}22;color:${col}">${row.risk_level}</div>
       </div>`;
@@ -382,7 +382,7 @@ function renderTable() {
         <td>${r.date}</td><td>${r.region}</td>
         <td><span class="risk-chip" style="background:${riskColor(r.risk_level)}">${r.risk_level}</span></td>
         <td>${fmt(r.probability)}</td>
-        <td>${f1(r.temp_max ?? r.temperature)}°/${f1(r.temp_min ?? r.temperature)}°C</td><td>${f1(r.wind)} km/h</td><td>${f1(r.humidity)}%</td>
+        <td>${f1(r.temp_min ?? r.temperature)}°/${f1(r.temp_max ?? r.temperature)}°C</td><td>${f1(r.wind)} km/h</td><td>${f1(r.humidity)}%</td>
       </tr>`).join("");
   } else {
     document.getElementById("tableTitle").textContent = "Hourly Forecast Detail";

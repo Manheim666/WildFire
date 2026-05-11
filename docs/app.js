@@ -23,10 +23,11 @@ const CIRC = 2 * Math.PI * 52;
 /* ─── DATA LOADING ────────────────────────────────────── */
 async function loadData() {
   try {
+    const v = Date.now();
     const [fRes, mRes, hRes] = await Promise.all([
-      fetch("./data/forecast_30_days.json"),
-      fetch("./data/metrics.json"),
-      fetch("./data/hourly_forecast_168h.json"),
+      fetch(`./data/forecast_30_days.json?v=${v}`),
+      fetch(`./data/metrics.json?v=${v}`),
+      fetch(`./data/hourly_forecast_168h.json?v=${v}`),
     ]);
     if (!fRes.ok) throw new Error(`Daily forecast: ${fRes.status}`);
     if (!mRes.ok) throw new Error(`Metrics: ${mRes.status}`);
